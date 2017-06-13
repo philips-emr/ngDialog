@@ -193,6 +193,9 @@
                             $elements.body.unbind('keydown', privateMethods.onDocumentKeydown);
                             keydownIsBound = false;
                         }
+                        if (dialogsCount == 0) {
+                          closeByDocumentHandler = undefined;
+                        }
                     },
 
                     closeDialogElement: function($dialog, value) {
