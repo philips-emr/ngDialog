@@ -154,6 +154,7 @@
 
                         if (dialogsCount === 1) {
                             $elements.body.unbind('keydown', privateMethods.onDocumentKeydown);
+                            privateMethods.deactivate($dialog);
                         }
 
                         if (!$dialog.hasClass('ngdialog-closing')){
