@@ -28,7 +28,8 @@
     var $el = angular.element;
     var isDef = angular.isDefined;
     var style = (document.body || document.documentElement).style;
-    var animationEndSupport = isDef(style.animation) || isDef(style.WebkitAnimation) || isDef(style.MozAnimation) || isDef(style.MsAnimation) || isDef(style.OAnimation);
+    // Avoid locking the close event when animationEndSupport it's not triggered by the browser.
+    var animationEndSupport = false;//isDef(style.animation) || isDef(style.WebkitAnimation) || isDef(style.MozAnimation) || isDef(style.MsAnimation) || isDef(style.OAnimation);
     var animationEndEvent = 'animationend webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend';
     var focusableElementSelector = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]';
     var disabledAnimationClass = 'ngdialog-disabled-animation';
