@@ -52,6 +52,7 @@
             closeByNavigation: false,
             appendTo: false,
             preCloseCallback: false,
+            onOpenCallback: false,
             overlay: true,
             cache: true,
             trapFocus: true,
@@ -468,6 +469,7 @@
                      * - closeByEscape {Boolean} - default true
                      * - closeByDocument {Boolean} - default true
                      * - preCloseCallback {String|Function} - user supplied function name/function called before closing dialog (if set)
+                     * - onOpenCallback {String|Function} - user supplied function name/function called after opening dialog (if set)
                      * - bodyClassName {String} - class added to body at open dialog
                      * @return {Object} dialog
                      */
@@ -551,27 +553,32 @@
 
                             privateMethods.applyAriaAttributes($dialog, options);
 
-                            if (options.preCloseCallback) {
-                                var preCloseCallback;
+                            [
+                                { name: '$ngDialogPreCloseCallback', value: options.preCloseCallback },
+                                { name: '$ngDialogOnOpenCallback', value: options.onOpenCallback }
+                            ].forEach(function (option) {
+                                if (option.value) {
+                                    var callback;
 
-                                if (angular.isFunction(options.preCloseCallback)) {
-                                    preCloseCallback = options.preCloseCallback;
-                                } else if (angular.isString(options.preCloseCallback)) {
-                                    if (scope) {
-                                        if (angular.isFunction(scope[options.preCloseCallback])) {
-                                            preCloseCallback = scope[options.preCloseCallback];
-                                        } else if (scope.$parent && angular.isFunction(scope.$parent[options.preCloseCallback])) {
-                                            preCloseCallback = scope.$parent[options.preCloseCallback];
-                                        } else if ($rootScope && angular.isFunction($rootScope[options.preCloseCallback])) {
-                                            preCloseCallback = $rootScope[options.preCloseCallback];
+                                    if (angular.isFunction(option.value)) {
+                                        callback = option.value;
+                                    } else if (angular.isString(option.value)) {
+                                        if (scope) {
+                                            if (angular.isFunction(scope[option.value])) {
+                                                callback = scope[option.value];
+                                            } else if (scope.$parent && angular.isFunction(scope.$parent[option.value])) {
+                                                callback = scope.$parent[option.value];
+                                            } else if ($rootScope && angular.isFunction($rootScope[option.value])) {
+                                                callback = $rootScope[option.value];
+                                            }
                                         }
                                     }
-                                }
 
-                                if (preCloseCallback) {
-                                    $dialog.data('$ngDialogPreCloseCallback', preCloseCallback);
+                                    if (callback) {
+                                        $dialog.data(option.name, callback);
+                                    }
                                 }
-                            }
+                            });
 
                             scope.closeThisDialog = function (value) {
                                 privateMethods.closeDialog($dialog, value);
@@ -626,6 +633,10 @@
                                     $rootScope.$broadcast('ngDialog.opened', {dialog: $dialog, name: options.name});
                                 } else {
                                     $rootScope.$broadcast('ngDialog.opened', $dialog);
+                                }
+                                var onOpenCallback = $dialog.data('$ngDialogOnOpenCallback');
+                                if (onOpenCallback && angular.isFunction(onOpenCallback)) {
+                                    onOpenCallback.call($dialog);
                                 }
                             });
 
@@ -837,6 +848,7 @@
                         closeByEscape: attrs.ngDialogCloseByEscape === 'false' ? false : (attrs.ngDialogCloseByEscape === 'true' ? true : defaults.closeByEscape),
                         overlay: attrs.ngDialogOverlay === 'false' ? false : (attrs.ngDialogOverlay === 'true' ? true : defaults.overlay),
                         preCloseCallback: attrs.ngDialogPreCloseCallback || defaults.preCloseCallback,
+                        onOpenCallback: attrs.ngDialogOnOpenCallback || defaults.onOpenCallback,
                         bodyClassName: attrs.ngDialogBodyClass || defaults.bodyClassName
                     });
                 });
