@@ -489,6 +489,8 @@
 
                         angular.extend(options, opts);
 
+                        var waitBeforeClose = $q.defer();
+
                         var defer;
                         defers[dialogID] = defer = $q.defer();
 
@@ -638,6 +640,8 @@
                                 if (onOpenCallback && angular.isFunction(onOpenCallback)) {
                                     onOpenCallback.call($dialog);
                                 }
+
+                                waitBeforeClose.resolve();
                             });
 
                             if (!keydownIsBound) {
@@ -681,7 +685,10 @@
                             id: dialogID,
                             closePromise: defer.promise,
                             close: function (value) {
-                                privateMethods.closeDialog($dialog, value);
+                                waitBeforeClose.promise.then(function() {
+                                    privateMethods.closeDialog($dialog, value);
+                                    waitBeforeClose = null;
+                                });
                             }
                         };
 
