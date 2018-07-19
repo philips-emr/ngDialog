@@ -685,10 +685,14 @@
                             id: dialogID,
                             closePromise: defer.promise,
                             close: function (value) {
-                                waitBeforeClose.promise.then(function() {
+                                if (waitBeforeClose == null) {
                                     privateMethods.closeDialog($dialog, value);
-                                    waitBeforeClose = null;
-                                });
+                                } else {
+                                    waitBeforeClose.promise.then(function() {
+                                        privateMethods.closeDialog($dialog, value);
+                                        waitBeforeClose = null;
+                                    });
+                                }
                             }
                         };
 
